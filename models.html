@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>tinkercad models</title>
+    <title>Interactive Sprite Grid - Default Frame 7</title>
     <style>
         :root {
             --frame-width: 300px;
             --frame-height: 202px;
+            /* Frame 7 is Index 6: 6 * 300 = 1800 */
+            --default-pos: -1800px; 
         }
 
         body {
@@ -18,37 +20,33 @@
             padding: 40px;
         }
 
-        /* The Grid Layout */
         .sprite-grid {
             display: grid;
-            /* Adjust '300px' to match your frame width */
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
             width: 100%;
             max-width: 1200px;
         }
 
-        /* The Sprite Container */
         .robot-viewer {
             width: var(--frame-width);
             height: var(--frame-height);
             background-color: white;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            cursor: pointer; /* Changes to hand icon on hover */
+            cursor: pointer;
             background-repeat: no-repeat;
-            background-position: 0px 0px;
+            /* UPDATED: Starts at Frame 7 */
+            background-position: var(--default-pos) 0px; 
             background-size: auto 100%;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             margin: 0 auto;
         }
 
-        /* Hover effect to show it is interactive */
         .robot-viewer:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 15px rgba(0,0,0,0.15);
         }
-
     </style>
 </head>
 <body>
@@ -60,44 +58,38 @@
         <div class="robot-viewer" data-src="wheels-sprite.png" data-url="wheels.html"></div>
         <div class="robot-viewer" data-src="tracks-sprite.png" data-url="tracks.html"></div>
         <div class="robot-viewer" data-src="classic-sprite.png" data-url="classic.html"></div>
-        </div>
+    </div>
 
     <script>
-        // Project Constants
         const FRAME_WIDTH = 300;
         const TOTAL_FRAMES = 15;
+        // Calculation for Frame 7 (Index 6)
+        const DEFAULT_OFFSET = `-${6 * FRAME_WIDTH}px`;
 
         const viewers = document.querySelectorAll('.robot-viewer');
 
         viewers.forEach(viewer => {
-            // 1. Initialize the image
             const imgPath = viewer.getAttribute('data-src');
             viewer.style.backgroundImage = `url('${imgPath}')`;
 
-            // 2. Handle Mouse Movement (The Scrubbing)
             viewer.addEventListener('mousemove', (e) => {
                 const rect = viewer.getBoundingClientRect();
-                const x = e.clientX - rect.left; // position inside the element
+                const x = e.clientX - rect.left;
                 
-                // Calculate which frame to show
                 let ratio = Math.max(0, Math.min(0.99, x / rect.width));
                 let frameIndex = Math.floor(ratio * TOTAL_FRAMES);
                 
-                // Update background position
                 viewer.style.backgroundPositionX = `-${frameIndex * FRAME_WIDTH}px`;
             });
 
-            // 3. Handle Clicking (The Navigation)
             viewer.addEventListener('click', () => {
                 const destination = viewer.getAttribute('data-url');
-                if (destination) {
-                    window.location.href = destination;
-                }
+                if (destination) window.location.href = destination;
             });
 
-            // 4. Optional: Reset position on mouse leave
+            // UPDATED: Reset position to Frame 7 instead of 0
             viewer.addEventListener('mouseleave', () => {
-                viewer.style.backgroundPositionX = '0px';
+                viewer.style.backgroundPositionX = DEFAULT_OFFSET;
             });
         });
     </script>
