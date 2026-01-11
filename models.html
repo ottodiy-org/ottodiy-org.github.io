@@ -5,95 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>tinkercad models</title>
     <style>
-        /* This is the container that captures mouse movements.
-           It's set to the exact size of one frame.
-        */
-        #animation-container {
-            width: 300px;  /* Frame Width */
-            height: 202px; /* Frame Height */
-            margin: 50px auto; /* Centered on page for demo */
-            cursor: e-resize; /* Suggests horizontal dragging */
-            border: 2px solid #ccc; /* Optional border */
-            position: relative;
-            overflow: hidden; /* Ensure nothing spills out */
+        :root {
+            --frame-width: 300px;
+            --frame-height: 202px;
         }
 
-        /* This element actually holds the image.
-           It will be shifted left and right behind the container window. 
-        */
-        #sprite-image {
-            width: 100%;
-            height: 100%;
-            /* IMPORTANT: Replace 'robot-sprite.png' with your actual image path */
-            background-image: url('quad-sprite.png'); 
-            background-repeat: no-repeat;
-            /* Start at the first frame (position 0 0) */
-            background-position: 0px 0px; 
+        body {
+            font-family: sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            padding: 40px;
         }
+
+        /* The Grid Layout */
+        .sprite-grid {
+            display: grid;
+            /* Adjust '300px' to match your frame width */
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        /* The Sprite Container */
+        .robot-viewer {
+            width: var(--frame-width);
+            height: var(--frame-height);
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            cursor: pointer; /* Changes to hand icon on hover */
+            background-repeat: no-repeat;
+            background-position: 0px 0px;
+            background-size: auto 100%;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin: 0 auto;
+        }
+
+        /* Hover effect to show it is interactive */
+        .robot-viewer:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+        }
+
     </style>
 </head>
 <body>
 
-
-    <div id="animation-container">
-        <div id="sprite-image"></div>
-    </div>
-
+    <div class="sprite-grid">
+        <div class="robot-viewer" data-src="quad-sprite.png" data-url="quad.html"></div>
+        <div class="robot-viewer" data-src="quad-sprite.png" data-url="quad.html"></div>
+        <div class="robot-viewer" data-src="quad-sprite.png" data-url="quad.html"></div>
+        <div class="robot-viewer" data-src="quad-sprite.png" data-url="quad.html"></div>
+        </div>
 
     <script>
-        // --- Configuration ---
-        const FRAME_WIDTH = 300;   // The width of a single frame in pixels
-        const FRAME_COUNT = 15;    // Total number of frames in the image strip
+        // Project Constants
+        const FRAME_WIDTH = 300;
+        const TOTAL_FRAMES = 15;
 
-        // --- DOM Elements ---
-        const container = document.getElementById('animation-container');
-        const sprite = document.getElementById('sprite-image');
+        const viewers = document.querySelectorAll('.robot-viewer');
 
-        // --- Variables for animation smoothness ---
-        let isAnimating = false;
-        let currentMouseX = 0;
+        viewers.forEach(viewer => {
+            // 1. Initialize the image
+            const imgPath = viewer.getAttribute('data-src');
+            viewer.style.backgroundImage = `url('${imgPath}')`;
 
-        // --- Event Listener ---
-        // Listen for mouse movement specifically over the container
-        container.addEventListener('mousemove', function(e) {
-            // Store the mouse X position relative to the container element
-            // e.offsetX gives the mouse coordinate within the target element
-            currentMouseX = e.offsetX;
+            // 2. Handle Mouse Movement (The Scrubbing)
+            viewer.addEventListener('mousemove', (e) => {
+                const rect = viewer.getBoundingClientRect();
+                const x = e.clientX - rect.left; // position inside the element
+                
+                // Calculate which frame to show
+                let ratio = Math.max(0, Math.min(0.99, x / rect.width));
+                let frameIndex = Math.floor(ratio * TOTAL_FRAMES);
+                
+                // Update background position
+                viewer.style.backgroundPositionX = `-${frameIndex * FRAME_WIDTH}px`;
+            });
 
-            // Use requestAnimationFrame for smooth performance.
-            // It prevents the browser from trying to update too many times per second.
-            if (!isAnimating) {
-                requestAnimationFrame(updateFrame);
-                isAnimating = true;
-            }
+            // 3. Handle Clicking (The Navigation)
+            viewer.addEventListener('click', () => {
+                const destination = viewer.getAttribute('data-url');
+                if (destination) {
+                    window.location.href = destination;
+                }
+            });
+
+            // 4. Optional: Reset position on mouse leave
+            viewer.addEventListener('mouseleave', () => {
+                viewer.style.backgroundPositionX = '0px';
+            });
         });
-
-
-        // --- The Core Logic ---
-        function updateFrame() {
-            // 1. Calculate the container's current width (in case it changes responsively, though fixed here)
-            const containerWidth = container.offsetWidth;
-
-            // 2. Determine how far across the container the mouse is as a percentage (0.0 to 1.0)
-            // We ensure it doesn't go below 0 or above 1 using Math.max and Math.min
-            let percentage = Math.max(0, Math.min(1, currentMouseX / containerWidth));
-
-            // 3. Map that percentage to a specific frame index (0 to 14)
-            // We floor the result to get an integer.
-            // We use Math.min to ensure we never try to access frame #15 (which doesn't exist, as it's 0-indexed)
-            let frameIndex = Math.min(FRAME_COUNT - 1, Math.floor(percentage * FRAME_COUNT));
-
-            // 4. Calculate the negative X position for the background image.
-            // e.g., Frame index 2 means shifting left by -600px (2 * 300)
-            let backgroundPositionX = -(frameIndex * FRAME_WIDTH);
-
-            // 5. Apply the new position to the style style
-            sprite.style.backgroundPositionX = backgroundPositionX + 'px';
-
-            // Reset animation lock
-            isAnimating = false;
-        }
-
     </script>
 </body>
 </html>
