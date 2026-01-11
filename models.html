@@ -3,18 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Sprite Grid - Default Frame 7</title>
+    <title>Sprite Grid with Name Labels</title>
     <style>
         :root {
             --frame-width: 300px;
             --frame-height: 202px;
-            /* Frame 7 is Index 6: 6 * 300 = 1800 */
-            --default-pos: -1800px; 
+            --default-pos: -1800px; /* Frame 7 (Index 6) */
         }
 
         body {
-            font-family: sans-serif;
-            background-color: #f4f4f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
             display: flex;
             justify-content: center;
             padding: 40px;
@@ -23,41 +22,65 @@
         .sprite-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+            gap: 30px;
             width: 100%;
             max-width: 1200px;
         }
 
         .robot-viewer {
+            position: relative; /* Necessary for absolute positioning of the label */
             width: var(--frame-width);
             height: var(--frame-height);
             background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             cursor: pointer;
             background-repeat: no-repeat;
-            /* UPDATED: Starts at Frame 7 */
             background-position: var(--default-pos) 0px; 
             background-size: auto 100%;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             margin: 0 auto;
+            overflow: hidden; /* Keeps the label inside the rounded corners */
+        }
+
+        /* The Overlay Label */
+        .robot-viewer::after {
+            content: attr(data-name); /* Pulls text from the data-name attribute */
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            pointer-events: none; /* IMPORTANT: Mouse goes "through" this to the image */
+            opacity: 0.8;
+            transition: opacity 0.2s;
         }
 
         .robot-viewer:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.15);
+        }
+
+        .robot-viewer:hover::after {
+            opacity: 1;
         }
     </style>
 </head>
 <body>
 
     <div class="sprite-grid">
-        <div class="robot-viewer" data-src="quad-sprite.png" data-url="quad.html"></div>
-        <div class="robot-viewer" data-src="ninja-sprite.png" data-url="ninja.html"></div>
-        <div class="robot-viewer" data-src="biped-sprite.png" data-url="biped.html"></div>
-        <div class="robot-viewer" data-src="wheels-sprite.png" data-url="wheels.html"></div>
-        <div class="robot-viewer" data-src="tracks-sprite.png" data-url="tracks.html"></div>
-        <div class="robot-viewer" data-src="classic-sprite.png" data-url="classic.html"></div>
+        <div class="robot-viewer" data-src="quad-sprite.png" data-url="quad.html" data-name="Quadruped"></div>
+        <div class="robot-viewer" data-src="ninja-sprite.png" data-url="ninja.html" data-name="Ninja"></div>
+        <div class="robot-viewer" data-src="biped-sprite.png" data-url="biped.html" data-name="Biped"></div>
+        <div class="robot-viewer" data-src="wheels-sprite.png" data-url="wheels.html" data-name="Wheels"></div>
+        <div class="robot-viewer" data-src="tracks-sprite.png" data-url="tracks.html" data-name="Tracks"></div>
+        <div class="robot-viewer" data-src="classic-sprite.png" data-url="classic.html" data-name="Classic"></div>
     </div>
 
     <script>
