@@ -10,6 +10,7 @@
             --frame-height: 202px;
             --default-pos: -1800px; /* Frame 7 (Index 6) */
             --header-height: 70px;
+            --primary-color: #007bff;
         }
 
         body {
@@ -19,16 +20,14 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* Added padding-top to account for the fixed header */
             padding-top: calc(var(--header-height) + 40px);
             padding-bottom: 40px;
         }
 
-        /* --- NEW FLOATING HEADER --- */
+        /* --- HEADER --- */
         header {
             position: fixed;
-            top: 0;
-            left: 0;
+            top: 0; left: 0;
             width: 100%;
             height: var(--header-height);
             background-color: #ffffff;
@@ -36,14 +35,57 @@
             align-items: center;
             padding: 0 40px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            z-index: 1000; /* Keeps header above the sprites */
+            z-index: 1000;
             box-sizing: border-box;
         }
 
-        header img {
-            height: 40px; /* Adjust logo height as needed */
-            width: auto;
+        header img { height: 40px; width: auto; }
+
+        /* --- POPUP MODAL STYLES --- */
+        .modal-overlay {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px); /* Modern blur effect */
+            z-index: 2000; /* Higher than header */
+            justify-content: center;
+            align-items: center;
         }
+
+        .modal-box {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .modal-box h2 { margin-top: 0; color: #333; }
+        .modal-box p { color: #666; line-height: 1.5; margin-bottom: 25px; }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .btn-ok { background: #e0e0e0; color: #333; }
+        .btn-url { background: var(--primary-color); color: white; }
+        .btn:hover { opacity: 0.8; }
 
         /* --- GRID AND VIEWER --- */
         .sprite-grid {
@@ -73,8 +115,7 @@
         .robot-viewer::after {
             content: attr(data-name);
             position: absolute;
-            bottom: 12px;
-            left: 12px;
+            bottom: 12px; left: 12px;
             background: rgba(0, 0, 0, 0.7);
             color: white;
             padding: 4px 10px;
@@ -82,23 +123,27 @@
             font-weight: bold;
             border-radius: 4px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
             pointer-events: none;
             opacity: 0.8;
             transition: opacity 0.2s;
         }
 
-        .robot-viewer:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 20px rgba(0,0,0,0.15);
-        }
-
-        .robot-viewer:hover::after {
-            opacity: 1;
-        }
+        .robot-viewer:hover { transform: translateY(-5px); box-shadow: 0 12px 20px rgba(0,0,0,0.15); }
+        .robot-viewer:hover::after { opacity: 1; }
     </style>
 </head>
 <body>
+
+    <div id="welcome-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h2>Welcome!</h2>
+            <p>Welcome to the Otto DIY 3D model viewer. Would you like to explore the models here or visit our main documentation?</p>
+            <div class="modal-buttons">
+                <button class="btn btn-ok" onclick="closeModal()">OK</button>
+                <a href="https://www.ottodiy.com" class="btn btn-url" onclick="closeModal()">Go to URL</a>
+            </div>
+        </div>
+    </div>
 
     <header>
         <img src="logo.png" alt="Ottodiy Logo">
@@ -119,6 +164,23 @@
         const TOTAL_FRAMES = 15;
         const DEFAULT_OFFSET = `-${6 * FRAME_WIDTH}px`;
 
+        // --- MODAL LOGIC ---
+        const modal = document.getElementById('welcome-modal');
+
+        window.onload = function() {
+            // Check if user has visited before
+            if (!localStorage.getItem('otto_visited')) {
+                modal.style.display = 'flex';
+            }
+        };
+
+        function closeModal() {
+            modal.style.display = 'none';
+            // Set the flag so they don't see it again
+            localStorage.setItem('otto_visited', 'true');
+        }
+
+        // --- SPRITE LOGIC ---
         const viewers = document.querySelectorAll('.robot-viewer');
 
         viewers.forEach(viewer => {
