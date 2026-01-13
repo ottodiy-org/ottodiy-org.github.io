@@ -9,16 +9,43 @@
             --frame-width: 300px;
             --frame-height: 202px;
             --default-pos: -1800px; /* Frame 7 (Index 6) */
+            --header-height: 70px;
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f0f2f5;
+            margin: 0;
             display: flex;
-            justify-content: center;
-            padding: 40px;
+            flex-direction: column;
+            align-items: center;
+            /* Added padding-top to account for the fixed header */
+            padding-top: calc(var(--header-height) + 40px);
+            padding-bottom: 40px;
         }
 
+        /* --- NEW FLOATING HEADER --- */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--header-height);
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000; /* Keeps header above the sprites */
+            box-sizing: border-box;
+        }
+
+        header img {
+            height: 40px; /* Adjust logo height as needed */
+            width: auto;
+        }
+
+        /* --- GRID AND VIEWER --- */
         .sprite-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -28,7 +55,7 @@
         }
 
         .robot-viewer {
-            position: relative; /* Necessary for absolute positioning of the label */
+            position: relative;
             width: var(--frame-width);
             height: var(--frame-height);
             background-color: white;
@@ -40,12 +67,11 @@
             background-size: auto 100%;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             margin: 0 auto;
-            overflow: hidden; /* Keeps the label inside the rounded corners */
+            overflow: hidden;
         }
 
-        /* The Overlay Label */
         .robot-viewer::after {
-            content: attr(data-name); /* Pulls text from the data-name attribute */
+            content: attr(data-name);
             position: absolute;
             bottom: 12px;
             left: 12px;
@@ -57,7 +83,7 @@
             border-radius: 4px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            pointer-events: none; /* IMPORTANT: Mouse goes "through" this to the image */
+            pointer-events: none;
             opacity: 0.8;
             transition: opacity 0.2s;
         }
@@ -74,6 +100,10 @@
 </head>
 <body>
 
+    <header>
+        <img src="logo.png" alt="Ottodiy Logo">
+    </header>
+
     <div class="sprite-grid">
         <div class="robot-viewer" data-src="quad-sprite.png" data-url="quad.html" data-name="Quadruped"></div>
         <div class="robot-viewer" data-src="ninja-sprite.png" data-url="ninja.html" data-name="Ninja"></div>
@@ -87,7 +117,6 @@
     <script>
         const FRAME_WIDTH = 300;
         const TOTAL_FRAMES = 15;
-        // Calculation for Frame 7 (Index 6)
         const DEFAULT_OFFSET = `-${6 * FRAME_WIDTH}px`;
 
         const viewers = document.querySelectorAll('.robot-viewer');
@@ -99,10 +128,8 @@
             viewer.addEventListener('mousemove', (e) => {
                 const rect = viewer.getBoundingClientRect();
                 const x = e.clientX - rect.left;
-                
                 let ratio = Math.max(0, Math.min(0.99, x / rect.width));
                 let frameIndex = Math.floor(ratio * TOTAL_FRAMES);
-                
                 viewer.style.backgroundPositionX = `-${frameIndex * FRAME_WIDTH}px`;
             });
 
@@ -111,7 +138,6 @@
                 if (destination) window.location.href = destination;
             });
 
-            // UPDATED: Reset position to Frame 7 instead of 0
             viewer.addEventListener('mouseleave', () => {
                 viewer.style.backgroundPositionX = DEFAULT_OFFSET;
             });
